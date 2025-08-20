@@ -1,0 +1,8 @@
+# Артефакты сборки Hugo - не коммитим
+public/
+
+# Кэш обработанных ассетов Hugo - минификация, fingerprint, SASS
+resources/
+
+# Статистика Hugo Pipes для очистки CSS и классов - пересоздается при билде
+hugo_stats.json

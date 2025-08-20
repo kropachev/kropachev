@@ -1,0 +1,17 @@
+language = "ru"
+
+[article]
+  toc = true
+  readingTime = true
+  math = false
+
+[article.license]
+  enabled = false
+  default = ""
+  custom = ""
+
+[sidebar]
+  position = "right"
+
+[[widgets.page]]
+  type = "toc"

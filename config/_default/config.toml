@@ -1,0 +1,27 @@
+baseURL = "https://kropachev.github.io/kropachev/"
+title = "kropachev.digital"
+languageCode = "ru"
+defaultContentLanguage = "ru"
+paginate = 10
+enableRobotsTXT = true
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[module]
+  [[module.imports]]
+    path = "github.com/CaiJimmy/hugo-theme-stack/v3"
+
+[params]
+  # Два раздела контента на главной и в архивах
+  mainSections = ["posts", "articles"]
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+  series = "series"
+
+[permalinks]
+  posts = "/p/:year/:month/:slug/"
+  articles = "/articles/:slug/"
