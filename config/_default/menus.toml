@@ -2,13 +2,37 @@
   name = "Статьи"
   pageRef = "/articles"
   weight = 10
+  params = { icon = "article" }
 
 [[main]]
   name = "Посты"
   pageRef = "/posts"
   weight = 20
+  params = { icon = "hash" }
 
 [[main]]
   name = "Обо мне"
   pageRef = "/about"
   weight = 90
+  params = { icon = "user" }
+
+[[social]]
+  identifier = "linkedin"
+  name = "LinkedIn"
+  url = "https://www.linkedin.com/in/sergey-kropachev/"
+  weight = 10
+  params = { icon = "brand-linkedin" }
+
+[[social]]
+  identifier = "telegram"
+  name = "Telegram"
+  url = "https://t.me/KropachevDigital"
+  weight = 20
+  params = { icon = "brand-telegram" }
+
+[[social]]
+  identifier = "github"
+  name = "GitHub"
+  url = "https://github.com/kropachev"
+  weight = 30
+  params = { icon = "brand-github" }
