@@ -1,14 +1,14 @@
 [[main]]
-  name = "Статьи"
-  pageRef = "/articles"
-  weight = 10
-  params = { icon = "article" }
-
-[[main]]
   name = "Посты"
   pageRef = "/posts"
-  weight = 20
+  weight = 10
   params = { icon = "hash" }
+
+[[main]]
+  name = "Статьи"
+  pageRef = "/articles"
+  weight = 20
+  params = { icon = "article" }
 
 [[main]]
   name = "Обо мне"
