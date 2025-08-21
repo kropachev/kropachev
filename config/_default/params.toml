@@ -13,5 +13,15 @@ language = "ru"
 [sidebar]
   position = "right"
 
+[[widgets.homepage]]
+  type = "tag-cloud"
+  [widgets.homepage.params]
+    limit = 20
+
+[[widgets.page]]
+  type = "tag-cloud"
+  [widgets.page.params]
+    limit = 20
+
 [[widgets.page]]
   type = "toc"
