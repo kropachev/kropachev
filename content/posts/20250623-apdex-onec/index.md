@@ -7,7 +7,7 @@ draft = false
 tags = ["APDEX", "Grafana", "Prometheus"]
 categories = ["short"]
 image = "20250623-apdex-onec.jpg"
-toc = false
+toc = true
 readingTime = true
 +++
 
