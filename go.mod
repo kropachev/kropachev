@@ -1,5 +1,5 @@
 module github.com/kropachev/kropachev
 
-go 1.22
+go 1.23
 
-require github.com/CaiJimmy/hugo-theme-stack/v3 v3.26.0
+require github.com/CaiJimmy/hugo-theme-stack/v3 v3.30.0
