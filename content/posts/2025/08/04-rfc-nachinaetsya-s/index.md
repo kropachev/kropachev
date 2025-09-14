@@ -3,7 +3,6 @@ title = "☀️ RFC начинается с \"зачем\", а не с \"как\
 date = "2025-08-04T05:30:00+00:00"
 description = "Пользователь создает запрос на изменение: \"Добавьте галочку\". Кажется просто - но это уже готовое решение. А действительно ли нужна именно галочка?"
 tags = ["CIO", "ChangeManagement", "ProductManagement", "RFC", "Requirements", "Value"]
-categories = ["short"]
 image = "04-rfc-nachinaetsya-s.jpg"
 toc = true
 readingTime = true

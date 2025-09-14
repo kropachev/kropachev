@@ -3,7 +3,6 @@ title = "\"Соберите отчет за год\" - фраза, после к
 date = "2025-06-25T05:29:59+00:00"
 description = "Потому что метрик нет. Никто не думал о них в момент запуска. А зря."
 tags = ["CIO", "CTO", "ProductAnalytics", "аналитика", "метрики"]
-categories = ["short"]
 image = "25-soberite-otchet-za.jpg"
 toc = true
 readingTime = true

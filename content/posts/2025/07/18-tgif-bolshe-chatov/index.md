@@ -3,7 +3,6 @@ title = "Пятничное: Больше чатов - Богу чатов"
 date = "2025-07-18T05:30:00+00:00"
 description = "## Хроника Васиного погружения в корпоративный шум"
 tags = ["ITSM", "KnowledgeManagement", "ServiceDesk", "корпоративнаякультура", "пятничное", "холивар"]
-categories = ["short"]
 image = "18-tgif-bolshe-chatov.jpg"
 toc = true
 readingTime = true
