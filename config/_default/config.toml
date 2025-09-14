@@ -17,6 +17,11 @@ enableRobotsTXT = true
   # Два раздела контента на главной и в архивах
   mainSections = ["posts", "articles"]
 
+[params.sidebar.avatar]
+enabled = true
+local   = false
+src     = "https://github.com/kropachev.png?size=150"
+
 [taxonomies]
   category = "categories"
   tag = "tags"
