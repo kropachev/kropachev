@@ -153,12 +153,11 @@ jobs:
             COMMIT_TYPE="🤖 Auto-sync from Telegram"
           fi
           
-          git commit -m "$COMMIT_TYPE: $NEW_COUNT new, $MODIFIED_COUNT updated
-
-- API updates: $API_NEW new posts, $API_EDITED edited posts  
-- Files: $NEW_COUNT added, $MODIFIED_COUNT modified
-- UTC time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-- Source: ${{ secrets.TELEGRAM_CHANNEL }}"
+          git commit -m "$COMMIT_TYPE: $NEW_COUNT new, $MODIFIED_COUNT updated" \
+           -m "API updates: $API_NEW new posts, $API_EDITED edited posts" \
+           -m "Files: $NEW_COUNT added, $MODIFIED_COUNT modified" \
+           -m "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" \
+           -m "Source: ${{ secrets.TELEGRAM_CHANNEL }}"
           
           git push
 
