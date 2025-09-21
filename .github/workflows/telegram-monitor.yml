@@ -22,17 +22,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: 'scripts/telegram-exporter/requirements.txt'
-
-      - name: Install dependencies
-        run: |
-          pip install "telethon==1.35.0" "tqdm==4.66.4"
-
       - name: Check for new posts and edits
         id: telegram-check
         run: |
@@ -43,11 +32,14 @@ jobs:
           # Query Bot API for updates
           RESPONSE=$(curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/getUpdates?offset=$OFFSET&timeout=10")
           
+          echo "🔍 Raw response status:"
+          echo "$RESPONSE" | jq -r '.ok // "unknown"'
+          
           # Extract new channel posts
-          NEW_POSTS=$(echo "$RESPONSE" | jq -r '.result[] | select(.channel_post != null) | .channel_post.message_id')
+          NEW_POSTS=$(echo "$RESPONSE" | jq -r '.result[]? | select(.channel_post != null) | .channel_post.message_id')
           
           # Extract edited channel posts  
-          EDITED_POSTS=$(echo "$RESPONSE" | jq -r '.result[] | select(.edited_channel_post != null) | .edited_channel_post.message_id')
+          EDITED_POSTS=$(echo "$RESPONSE" | jq -r '.result[]? | select(.edited_channel_post != null) | .edited_channel_post.message_id')
           
           # Combine and deduplicate message IDs
           ALL_MESSAGE_IDS=$(echo -e "$NEW_POSTS\n$EDITED_POSTS" | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
@@ -57,29 +49,45 @@ jobs:
           EDITED_COUNT=$(echo "$EDITED_POSTS" | grep -c '^[0-9]' || echo "0")
           
           echo "📝 New posts: $NEW_COUNT, Edited posts: $EDITED_COUNT"
+          echo "🎯 Combined message IDs: $ALL_MESSAGE_IDS"
           
+          # Determine if we need to proceed with export
           if [ -n "$ALL_MESSAGE_IDS" ] || [ "${{ github.event.inputs.force_sync }}" == "true" ]; then
-            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "needs_export=true" >> $GITHUB_OUTPUT
             echo "message_ids=$ALL_MESSAGE_IDS" >> $GITHUB_OUTPUT
-            echo "response=$RESPONSE" >> $GITHUB_OUTPUT
             echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT  
             echo "edited_count=$EDITED_COUNT" >> $GITHUB_OUTPUT
-            echo "✅ Updates detected or force sync requested"
+            echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+            echo "✅ Updates detected or force sync requested - proceeding to export"
             
-            # Update offset for the next check (only if we have actual updates from API)
-            if [ -n "$ALL_MESSAGE_IDS" ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
-              LAST_UPDATE_ID=$(echo "$RESPONSE" | jq -r '.result[-1].update_id // 0')
-              NEXT_OFFSET=$((LAST_UPDATE_ID + 1))
-              echo $NEXT_OFFSET > scripts/telegram-exporter/telegram-offset.txt
-              echo "📝 Offset updated to: $NEXT_OFFSET"
-            fi
+            # Store current response for offset update later
+            echo "current_response=$RESPONSE" >> $GITHUB_OUTPUT
           else
-            echo "has_updates=false" >> $GITHUB_OUTPUT
-            echo "❌ No new posts or edits"
+            echo "needs_export=false" >> $GITHUB_OUTPUT
+            echo "❌ No new posts or edits - skipping expensive steps"
           fi
 
-      - name: Export specific Telegram posts to Hugo
-        if: steps.telegram-check.outputs.has_updates == 'true'
+      - name: Early exit summary
+        if: steps.telegram-check.outputs.needs_export == 'false'
+        run: |
+          echo "🏃‍♂️ Early exit: No updates found"
+
+      - name: Set up Python
+        if: steps.telegram-check.outputs.needs_export == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'scripts/telegram-exporter/requirements.txt'
+
+      - name: Install dependencies
+        if: steps.telegram-check.outputs.needs_export == 'true'
+        run: |
+          echo "🔧 Installing Python dependencies (only when needed)"
+          pip install -r scripts/telegram-exporter/requirements.txt
+
+      - name: Export Telegram posts to Hugo
+        if: steps.telegram-check.outputs.needs_export == 'true'
         run: |
           cd scripts/telegram-exporter
           
@@ -100,20 +108,48 @@ jobs:
             MESSAGE_IDS="${{ steps.telegram-check.outputs.message_ids }}"
             echo "🎯 Targeted export: processing message IDs: $MESSAGE_IDS"
             
-            python export_telegram_to_hugo.py \
-              --channel "${{ secrets.TELEGRAM_CHANNEL }}" \
-              --api-id "${{ secrets.TELEGRAM_API_ID }}" \
-              --api-hash "${{ secrets.TELEGRAM_API_HASH }}" \
-              --out "../../content/posts" \
-              --message-ids "$MESSAGE_IDS" \
-              --remove-hashtags \
-              --delete-session \
-              --verbose
+            # Fallback to limit-based export if message-ids not supported
+            if python export_telegram_to_hugo.py --help | grep -q "\-\-message-ids"; then
+              python export_telegram_to_hugo.py \
+                --channel "${{ secrets.TELEGRAM_CHANNEL }}" \
+                --api-id "${{ secrets.TELEGRAM_API_ID }}" \
+                --api-hash "${{ secrets.TELEGRAM_API_HASH }}" \
+                --out "../../content/posts" \
+                --message-ids "$MESSAGE_IDS" \
+                --remove-hashtags \
+                --delete-session \
+                --verbose
+            else
+              echo "⚠️ Targeted export not yet implemented, using limit-based fallback"
+              python export_telegram_to_hugo.py \
+                --channel "${{ secrets.TELEGRAM_CHANNEL }}" \
+                --api-id "${{ secrets.TELEGRAM_API_ID }}" \
+                --api-hash "${{ secrets.TELEGRAM_API_HASH }}" \
+                --out "../../content/posts" \
+                --limit 5 \
+                --remove-hashtags \
+                --delete-session \
+                --verbose
+            fi
+          fi
+
+      - name: Update offset
+        if: steps.telegram-check.outputs.needs_export == 'true'
+        run: |
+          # Update offset only if we had actual API updates (not force_sync)
+          if [ -n "${{ steps.telegram-check.outputs.message_ids }}" ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
+            RESPONSE="${{ steps.telegram-check.outputs.current_response }}"
+            LAST_UPDATE_ID=$(echo "$RESPONSE" | jq -r '.result[-1].update_id // 0')
+            NEXT_OFFSET=$((LAST_UPDATE_ID + 1))
+            echo $NEXT_OFFSET > scripts/telegram-exporter/telegram-offset.txt
+            echo "📝 Offset updated to: $NEXT_OFFSET"
+          else
+            echo "📝 Offset unchanged (force_sync or no updates)"
           fi
 
       - name: Check for content changes
         id: changes
-        if: steps.telegram-check.outputs.has_updates == 'true'
+        if: steps.telegram-check.outputs.needs_export == 'true'
         run: |
           if [ -n "$(git status --porcelain content/posts/)" ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
@@ -129,7 +165,7 @@ jobs:
             echo "📊 Changes: $NEW_COUNT new, $MODIFIED_COUNT modified"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No content changes"
+            echo "ℹ️ No content changes after export"
           fi
 
       - name: Commit and push changes
@@ -155,10 +191,10 @@ jobs:
           fi
           
           git commit -m "$COMMIT_TYPE: $NEW_COUNT new, $MODIFIED_COUNT updated" \
-           -m "API updates: $API_NEW new posts, $API_EDITED edited posts" \
-           -m "Files: $NEW_COUNT added, $MODIFIED_COUNT modified" \
-           -m "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" \
-           -m "Source: ${{ secrets.TELEGRAM_CHANNEL }}"
+                     -m "API updates: $API_NEW new posts, $API_EDITED edited posts" \
+                     -m "Files: $NEW_COUNT added, $MODIFIED_COUNT modified" \
+                     -m "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" \
+                     -m "Source: ${{ secrets.TELEGRAM_CHANNEL }}"
           
           git push
 
