@@ -51,14 +51,28 @@ jobs:
           echo "📝 New posts: $NEW_COUNT, Edited posts: $EDITED_COUNT"
           echo "🎯 Combined message IDs: $ALL_MESSAGE_IDS"
           
-          # Determine if we need to proceed with export
+          # DEBUG: Show what we're trying to write to outputs
+          echo "🔍 DEBUG - Values to be written:"
+          echo "  needs_export: $([[ -n "$ALL_MESSAGE_IDS" ]] || [[ "${{ github.event.inputs.force_sync }}" == "true" ]] && echo "true" || echo "false")"
+          echo "  message_ids: '$ALL_MESSAGE_IDS'"
+          echo "  new_count: '$NEW_COUNT'"
+          echo "  edited_count: '$EDITED_COUNT'"
+          
+          # Clean and validate all variables before writing to GITHUB_OUTPUT
           if [ -n "$ALL_MESSAGE_IDS" ] || [ "${{ github.event.inputs.force_sync }}" == "true" ]; then
-            echo "needs_export=true" >> $GITHUB_OUTPUT
-            echo "message_ids=$ALL_MESSAGE_IDS" >> $GITHUB_OUTPUT
-            echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT  
-            echo "edited_count=$EDITED_COUNT" >> $GITHUB_OUTPUT
+            # Sanitize message_ids - remove any problematic characters
+            CLEAN_MESSAGE_IDS=$(echo "$ALL_MESSAGE_IDS" | tr -d '\n\r' | sed 's/[^0-9,]//g')
             
-            # Store raw response in temp file instead of GITHUB_OUTPUT
+            # Ensure counts are numeric
+            CLEAN_NEW_COUNT=$(echo "$NEW_COUNT" | grep -o '^[0-9]*$' || echo "0")
+            CLEAN_EDITED_COUNT=$(echo "$EDITED_COUNT" | grep -o '^[0-9]*$' || echo "0")
+            
+            echo "needs_export=true" >> $GITHUB_OUTPUT
+            echo "message_ids=${CLEAN_MESSAGE_IDS}" >> $GITHUB_OUTPUT
+            echo "new_count=${CLEAN_NEW_COUNT}" >> $GITHUB_OUTPUT  
+            echo "edited_count=${CLEAN_EDITED_COUNT}" >> $GITHUB_OUTPUT
+            
+            # Store response for later use in temp file
             echo "$RESPONSE" > /tmp/telegram_response.json
             
             echo "✅ Updates detected - proceeding to export"
@@ -146,13 +160,11 @@ jobs:
                 echo $NEXT_OFFSET > scripts/telegram-exporter/telegram-offset.txt
                 echo "📝 Offset updated to: $NEXT_OFFSET"
               else
-                echo "📝 No valid update_id found, keeping current offset"
+                echo "📝 No valid update_id found"
               fi
-            else
-              echo "📝 No response file found, keeping current offset"
             fi
           else
-            echo "📝 Offset unchanged (force_sync or no updates)"
+            echo "📝 Offset unchanged"
           fi
 
       - name: Check for content changes
@@ -160,17 +172,19 @@ jobs:
         if: steps.telegram-check.outputs.needs_export == 'true'
         run: |
           if [ -n "$(git status --porcelain content/posts/)" ]; then
+            NEW_COUNT=$(git status --porcelain content/posts/ | grep -c "^A" || echo "0")
+            MODIFIED_COUNT=$(git status --porcelain content/posts/ | grep -c "^M" || echo "0")
+            
+            # Ensure values are clean numbers
+            CLEAN_NEW_COUNT=$(echo "$NEW_COUNT" | grep -o '^[0-9]*$' || echo "0")
+            CLEAN_MODIFIED_COUNT=$(echo "$MODIFIED_COUNT" | grep -o '^[0-9]*$' || echo "0")
+            
             echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "new_posts_count=${CLEAN_NEW_COUNT}" >> $GITHUB_OUTPUT
+            echo "modified_posts_count=${CLEAN_MODIFIED_COUNT}" >> $GITHUB_OUTPUT
+            
             echo "✅ Content changes detected"
-            
-            # Count newly added posts
-            NEW_COUNT=$(git status --porcelain content/posts/ | grep "^A" | wc -l)
-            # Count modified posts  
-            MODIFIED_COUNT=$(git status --porcelain content/posts/ | grep "^M" | wc -l)
-            
-            echo "new_posts_count=$NEW_COUNT" >> $GITHUB_OUTPUT
-            echo "modified_posts_count=$MODIFIED_COUNT" >> $GITHUB_OUTPUT
-            echo "📊 Changes: $NEW_COUNT new, $MODIFIED_COUNT modified"
+            echo "📊 Changes: $CLEAN_NEW_COUNT new, $CLEAN_MODIFIED_COUNT modified"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No content changes"
