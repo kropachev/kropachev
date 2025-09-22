@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "🏃‍♂️ Early exit: No updates found"
 
-          - name: Set up Python
+      - name: Set up Python
         if: steps.telegram-check.outputs.needs_export == 'true'
         uses: actions/setup-python@v4
         with:
