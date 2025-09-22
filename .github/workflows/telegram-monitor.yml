@@ -37,7 +37,7 @@ jobs:
           
           # Extract new channel posts
           NEW_POSTS=$(echo "$RESPONSE" | jq -r '.result[]? | select(.channel_post != null) | .channel_post.message_id')
-          
+
           # Extract edited channel posts  
           EDITED_POSTS=$(echo "$RESPONSE" | jq -r '.result[]? | select(.edited_channel_post != null) | .edited_channel_post.message_id')
           
@@ -57,13 +57,14 @@ jobs:
             echo "message_ids=$ALL_MESSAGE_IDS" >> $GITHUB_OUTPUT
             echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT  
             echo "edited_count=$EDITED_COUNT" >> $GITHUB_OUTPUT
-            # Store only the last update_id for offset calculation (not full response)
-            LAST_UPDATE_ID=$(echo "$RESPONSE" | jq -r 'if (.result | length) > 0 then .result[-1].update_id else "0" end')
-            echo "last_update_id=${LAST_UPDATE_ID}" >> $GITHUB_OUTPUT
-            echo "✅ Updates detected or force sync requested - proceeding to export"
+            
+            # Store raw response in temp file instead of GITHUB_OUTPUT
+            echo "$RESPONSE" > /tmp/telegram_response.json
+            
+            echo "✅ Updates detected - proceeding to export"
           else
             echo "needs_export=false" >> $GITHUB_OUTPUT
-            echo "❌ No new posts or edits - skipping expensive steps"
+            echo "❌ No new posts or edits"
           fi
 
       - name: Early exit summary
@@ -137,14 +138,18 @@ jobs:
         run: |
           # Update offset only if we had actual API updates (not force_sync)
           if [ -n "${{ steps.telegram-check.outputs.message_ids }}" ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
-            LAST_UPDATE_ID="${{ steps.telegram-check.outputs.last_update_id }}"
-            # Ensure LAST_UPDATE_ID is numeric and not empty
-            if [[ "$LAST_UPDATE_ID" =~ ^[0-9]+$ ]]; then
-              NEXT_OFFSET=$((LAST_UPDATE_ID + 1))
-              echo $NEXT_OFFSET > scripts/telegram-exporter/telegram-offset.txt
-              echo "📝 Offset updated to: $NEXT_OFFSET"
+            # Read response from temp file instead of GitHub output
+            if [ -f /tmp/telegram_response.json ]; then
+              LAST_UPDATE_ID=$(cat /tmp/telegram_response.json | jq -r '.result[-1].update_id // "0"')
+              if [ "$LAST_UPDATE_ID" != "null" ] && [ "$LAST_UPDATE_ID" != "0" ]; then
+                NEXT_OFFSET=$((LAST_UPDATE_ID + 1))
+                echo $NEXT_OFFSET > scripts/telegram-exporter/telegram-offset.txt
+                echo "📝 Offset updated to: $NEXT_OFFSET"
+              else
+                echo "📝 No valid update_id found, keeping current offset"
+              fi
             else
-              echo "⚠️ Invalid LAST_UPDATE_ID: $LAST_UPDATE_ID, keeping current offset"
+              echo "📝 No response file found, keeping current offset"
             fi
           else
             echo "📝 Offset unchanged (force_sync or no updates)"
@@ -168,7 +173,7 @@ jobs:
             echo "📊 Changes: $NEW_COUNT new, $MODIFIED_COUNT modified"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No content changes after export"
+            echo "ℹ️ No content changes"
           fi
 
       - name: Commit and push changes
