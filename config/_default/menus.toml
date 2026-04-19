@@ -1,38 +1,60 @@
 [[main]]
-  name = "Посты"
-  pageRef = "/posts"
-  weight = 10
-  params = { icon = "hash" }
+    identifier = "home"
+    name = "Главная"
+    url = "/"
+    weight = -100
+    [main.params]
+        icon = "home"
 
 [[main]]
-  name = "Статьи"
-  pageRef = "/articles"
-  weight = 20
-  params = { icon = "article" }
+    identifier = "posts"
+    name = "Посты"
+    pageRef = "/posts"
+    weight = -90
+    [main.params]
+        icon = "hash"
 
 [[main]]
-  name = "Обо мне"
-  pageRef = "/about"
-  weight = 90
-  params = { icon = "user" }
+    identifier = "projects"
+    name = "Проекты"
+    url = "/projects/"
+    weight = -80
+    [main.params]
+        icon = "code"
+
+[[main]]
+    identifier = "about"
+    name = "Обо мне"
+    url = "/page/about/"
+    weight = -20
+    [main.params]
+        icon = "user"
+
+[[main]]
+    identifier = "search"
+    name = "Поиск"
+    url = "/page/search/"
+    weight = -10
+    [main.params]
+        icon = "search"
 
 [[social]]
-  identifier = "linkedin"
-  name = "LinkedIn"
-  url = "https://www.linkedin.com/in/sergey-kropachev/"
-  weight = 10
-  params = { icon = "brand-linkedin" }
+    identifier = "linkedin"
+    name = "LinkedIn"
+    url = "https://www.linkedin.com/in/sergey-kropachev/"
+    weight = 10
+    params = { icon = "brand-linkedin" }
 
 [[social]]
-  identifier = "telegram"
-  name = "Telegram"
-  url = "https://t.me/KropachevDigital"
-  weight = 20
-  params = { icon = "brand-telegram" }
+    identifier = "telegram"
+    name = "Telegram"
+    url = "https://t.me/KropachevDigital"
+    weight = 20
+    params = { icon = "brand-telegram" }
 
 [[social]]
-  identifier = "github"
-  name = "GitHub"
-  url = "https://github.com/kropachev"
-  weight = 30
-  params = { icon = "brand-github" }
+    identifier = "github"
+    name = "GitHub"
+    url = "https://github.com/kropachev"
+    weight = 30
+    params = { icon = "brand-github" }

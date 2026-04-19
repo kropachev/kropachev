@@ -1,27 +1,43 @@
-language = "ru"
-
-[article]
-  toc = true
-  readingTime = true
-  math = false
-
-[article.license]
-  enabled = false
-  default = ""
-  custom = ""
+mainSections = ["posts", "projects"]
 
 [sidebar]
-  position = "right"
+    emoji = ""
+    subtitle = ""
+    avatar = "https://github.com/kropachev.png?size=150"
+
+[comments]
+    enabled = false
 
 [[widgets.homepage]]
-  type = "tag-cloud"
-  [widgets.homepage.params]
-    limit = 20
+    type = "search"
+
+[[widgets.homepage]]
+    type = "tag-cloud"
+    [widgets.homepage.params]
+        limit = 30
+
+#[[widgets.homepage]]
+#    type = "categories"
+#    [widgets.homepage.params]
+#        limit = 10
+
+#[[widgets.homepage]]
+#    type = "archives"
+#    [widgets.homepage.params]
+#        limit = 5
 
 [[widgets.page]]
-  type = "tag-cloud"
-  [widgets.page.params]
-    limit = 20
+    type = "search"
 
 [[widgets.page]]
-  type = "toc"
+    type = "toc"
+
+#[[widgets.page]]
+#    type = "tag-cloud"
+#    [widgets.page.params]
+#        limit = 30
+
+#[[widgets.page]]
+#    type = "categories"
+#    [widgets.page.params]
+#        limit = 10

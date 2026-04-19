@@ -1,0 +1,5 @@
+github.com/CaiJimmy/hugo-theme-stack/v4 v4.0.0-beta.15 h1:cGS2Vrgtq13J0vjLJkonH4o3afOvhvqD1Ih4C1OwsR8=
+github.com/CaiJimmy/hugo-theme-stack/v4 v4.0.0-beta.15/go.mod h1:6SWZIQIut6uVjxhLraexYzgtdNDrod0xnfM/to6D/1I=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

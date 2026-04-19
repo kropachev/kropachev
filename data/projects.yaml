@@ -1,0 +1,11 @@
+- repo: https://github.com/kropachev/1c-devops-jr
+  strip_cover: true                 # опционально, по умолчанию false
+- repo: https://github.com/kropachev/1c-sync-manager
+- repo: https://github.com/kropachev/object-event-handlers
+  branch: master                      # опционально, по умолчанию main
+- repo: https://github.com/kropachev/1c-ecm-ext-doc
+  branch: master                      # опционально, по умолчанию main
+- repo: https://github.com/kropachev/proxmox-notes
+  branch: master                      # опционально, по умолчанию main
+- repo: https://github.com/kropachev/hugo-site-guide
+  branch: master                      # опционально, по умолчанию main
