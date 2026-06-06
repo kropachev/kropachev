@@ -1,6 +1,6 @@
 baseURL = "https://kropachev.digital/"
 title = "kropachev.digital"
-languageCode = "ru"
+locale = "ru"
 defaultContentLanguage = "ru"
 
 [module]
