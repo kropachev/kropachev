@@ -6,3 +6,9 @@ defaultContentLanguage = "ru"
 [module]
   [[module.imports]]
     path = "github.com/CaiJimmy/hugo-theme-stack/v4"
+
+[services.googleAnalytics]
+    ID = "G-J0WLQD6BEE"
+
+[privacy.googleAnalytics]
+    respectDoNotTrack = true
