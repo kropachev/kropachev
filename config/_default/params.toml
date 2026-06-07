@@ -5,6 +5,14 @@ mainSections = ["posts", "projects"]
     subtitle = ""
     avatar = "https://github.com/kropachev.png?size=150"
 
+[cookies]
+    enabled     = true
+    showSettings = true
+
+    [cookies.categories]
+        analytics  = true
+        functional = true
+
 [comments]
     enabled = false
 
