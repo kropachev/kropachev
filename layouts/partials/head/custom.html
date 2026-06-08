@@ -1,0 +1,37 @@
+<script>
+(function() {
+    var loaded = false;
+
+    function loadMetrika() {
+        if (loaded) return;
+
+        // Уважаем настройку Do Not Track в браузере
+        var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+        if (dnt == "1" || dnt == "yes") return;
+
+        loaded = true;
+
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109730013', 'ym');
+
+    ym(109730013, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+
+    }
+
+    // Сценарий 1: пользователь только что нажал "Принять" в баннере
+    window.addEventListener('onCookieConsentChange', function(e) {
+        if (e.detail && e.detail.analytics) loadMetrika();
+    });
+
+    // Сценарий 2: согласие уже было дано в прошлый визит
+    if (window.cookieConsent && window.cookieConsent.hasConsent('analytics')) {
+        loadMetrika();
+    }
+})();
+</script>
+
+<noscript><div><img src="https://mc.yandex.ru/watch/109730013" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
