@@ -49,3 +49,12 @@ mainSections = ["posts", "projects"]
 #    type = "categories"
 #    [widgets.page.params]
 #        limit = 10
+
+[footer]
+    customText = '''
+        <a href="/page/privacy/">Политика конфиденциальности</a>
+        <br>
+        <a href="#" data-cookie-action="reopen" onclick="event.preventDefault()">
+            Настройки cookie
+        </a>
+    '''
